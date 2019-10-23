@@ -226,11 +226,19 @@ public class SerialTest
                     deviceNumber = i;
                 if (soundCounter < 5)
                 {
-                    sl.Add(soundFiles[soundCounter]);
-                    soundFiles[soundCounter].Init(deviceNumber);
+                    if (cap.ProductName.ToLower().Contains("speakers"))
+                    {
+                        sl.Add(soundFiles[1]);
+                        soundFiles[1].Init(deviceNumber);
+                    }
+                    else
+                    {
+                        sl.Add(soundFiles[0]);
+                        soundFiles[0].Init(deviceNumber);
+                    }
                     
                 }
-                soundCounter++;
+                
                 if (soundCounter == soundFiles.Length) break;
             }
             
@@ -247,7 +255,7 @@ public class SerialTest
         }
         SerialPort btPort = new SerialPort();
         btPort.BaudRate = 9600;
-        btPort.PortName = "COM3"; // Set in Windows
+        btPort.PortName = "COM5"; // Set in Windows
         int counter = 0;
         while (true)
         {
