@@ -9,6 +9,7 @@ const String dataDelimiter = "|";
 int motionPin = 8; // Input for HC-S501
 const int trigPin = 9;
 const int echoPin = 10;
+const int relayPin = 12;
 
 long duration;
 int distance;
@@ -23,6 +24,7 @@ void setup() {
   //pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   //pinMode(echoPin, INPUT); // Sets the echoPin as an Input
   pinMode(motionPin, INPUT);
+  pinMode(relayPin, OUTPUT);
 }
 
 
@@ -46,7 +48,17 @@ void ProcessBTCommands()
           command = command.substring(i+1);
         }
         else command = "";
-        if(currentCommand == "D")
+        if(currentCommand == "RON")
+        {
+          //ProcessDistance();
+          digitalWrite(relayPin, HIGH);
+        }
+        else if(currentCommand == "ROFF")
+        {
+          //ProcessDistance();
+          digitalWrite(relayPin, LOW);
+        }
+        else if(currentCommand == "D")
         {
           //ProcessDistance();
           motionValue = digitalRead(motionPin);

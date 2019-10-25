@@ -17,6 +17,8 @@ using System.Timers;
 public class Sound
 {
 
+    
+
     private WaveOutEvent outputDevice = null;
     private AudioFileReader audioFile = null;
 
@@ -153,6 +155,7 @@ public class SoundList : List<Sound>
 public class SerialTest
 {
 
+    static SerialPort btPort = new SerialPort();
 
     private static string dataDelimiter = "|";
     static SoundList sl = new SoundList();
@@ -178,12 +181,14 @@ public class SerialTest
                 else if (currentData.Contains("MN:0"))
                 {
                     sl.Silence(true);
+                    lightEffectStarted = false;
                     Thread.Sleep(500);
                     
                 }
                 else if (currentData.Contains("MN:1"))
                 {
                     sl.Silence(false);
+                    lightEffectStarted = true;
                     Thread.Sleep(500);
                     
                 }
@@ -199,12 +204,49 @@ public class SerialTest
         return response;
 
     }
+
+    public static void WriteToPort(string command)
+    {
+        lock (btPort)
+        {
+            btPort.Write(command + dataDelimiter);
+        }
+    }
+
+    public static void ThreadedLightEffect()
+    {
+    }
+
+    static bool lightEffectStarted = false;
+    public static void LightEffect()
+    {
+        
+        Random rnd = new Random();
+        while(true)
+        { 
+            if (lightEffectStarted)
+            {
+                WriteToPort("RON");
+                System.Threading.Thread.Sleep(rnd.Next(300));
+                WriteToPort("ROFF");
+                System.Threading.Thread.Sleep(rnd.Next(400));
+            }
+        }
+       
+    }
+
+    public static void StartLightEffect()
+    {
+        Thread th = new Thread(LightEffect);
+        th.Start();
+    }
+
     public static void Main()
     {
 
         //ThreadedPlaySound(0);
 
-        
+        StartLightEffect();
 
         Sound[] soundFiles = new Sound[2]
         {
@@ -247,16 +289,15 @@ public class SerialTest
         soundFiles[0].Play();
         soundFiles[1].Play();
 
+        
 
-        //var device3 = playSound(1);
-        for (int i = 0; i < 100; i++)
-        {
-            System.Threading.Thread.Sleep(100);
-        }
-        SerialPort btPort = new SerialPort();
+        
         btPort.BaudRate = 9600;
-        btPort.PortName = "COM5"; // Set in Windows
+        btPort.PortName = "COM8"; // Set in Windows
         int counter = 0;
+        
+
+
         while (true)
         {
             counter++;
@@ -272,6 +313,8 @@ public class SerialTest
             }
         }
 
+        
+
         string response = "";
         while (btPort.IsOpen)// && serialIncomingPort.IsOpen)
         {
@@ -284,7 +327,7 @@ public class SerialTest
                 }
             }
             response = ParseResponse(response);
-            btPort.Write("D"+dataDelimiter);
+            WriteToPort("D");
             
             // WRITE THE INCOMING BUFFER TO CONSOLE
             
